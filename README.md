@@ -11,6 +11,10 @@ Next, open your command window and run the following commands:
   - `pip install nltk`
   - `pip install corpus`
 
+Next, using the command window, locate the directory in which the `init_script.py` file is located.
+
+From that directory, run the command `python3 init_script.py`. That script will download the necessary data, including the list of dictionary words. A window will likely open, follow all instructions in that window. This script only needs to be run once, no additional data will be downloaded if the script is ran again.
+
 Assuming all downloads were properly completed, the tool should be usable.
 
 ## Using the Tool
