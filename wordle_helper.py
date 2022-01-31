@@ -166,11 +166,14 @@ def main():
     print("-------------------------------------------------------------------------------\n")
     print("Possible words:")
 
-    # Sort the list of possible words
-    output_words.sort()
+    # Remove any duplicated words
+    sorted_words = list(set(output_words))
+
+    # Sort the final output list alphabetically
+    sorted_words.sort()
 
     # Print each of the possible words
-    for word in output_words:
+    for word in sorted_words:
         print("\t- " + word)
 
 if __name__ == "__main__":
