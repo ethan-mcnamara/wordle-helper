@@ -1,3 +1,7 @@
+# Ethan McNamara
+# 2022-01-30
+
+# These import statements take a short while, the print statement shows that process is ongoing
 print("Downloading word list...")
 from nltk.corpus import words
 import re
@@ -52,17 +56,23 @@ def main():
     # List to store all letters known to not be in the final word
     invalid_letters = []
 
+    # Get the input words from the user
     for num in range(num_words):
         # Get the words and their colour from the user
         user_input.append(input("Enter a word, remember above formatting:\n"))
-
         # Seperate the letters, using spaces as seperators
         formatted_input.append(user_input[-1].lower().split())
-
         # All Wordle words must be 5 letters
-        if (len(formatted_input[-1]) != 5):
-            print("**Your word was not 5 letters, try again**")
-            exit()
+        # Keep asking for words until a 5-letter word is recieved
+        while (True):
+            if (len(formatted_input[-1]) != 5):
+                print("\n**Your word was not 5 letters, try again**\n")
+                user_input.pop()
+                formatted_input.pop()
+                user_input.append(input("Enter a word, remember above formatting:\n"))
+                formatted_input.append(user_input[-1].lower().split())
+            else:
+                break
 
     # List to store the current word being processed
     cur_word = []
@@ -88,23 +98,26 @@ def main():
                     elif (letter.replace("-", "") not in final_word[index]):
                         final_word[index].append(letter.replace("-", ""))
                         known_letters.append(letter.replace("-", ""))
+                # If this letter has previously been declared invalid, reverse that
                 if (letter in invalid_letters):
                     invalid_letters.remove(letter)
-
             # GREEN letter
             elif (re.search("\*.\*", letter)):
+                # Clear all other letters from that position and replace them with this letter
                 final_word[word.index(letter)] = []
                 final_word[word.index(letter)].append(letter.replace("*", ""))
+                # Add this letter to the green_letters list
                 green_letters[word.index(letter)] = letter.replace("*", "")
+                # Add this letter to the known_letters list
                 known_letters.append(letter.replace("*", ""))
+                # If this letter has previously been declared invalid, reverse that
                 if (letter in invalid_letters):
                     invalid_letters.remove(letter)
-
             # GRAY letter
             else:
+                # If this letter occurs more than once in this word, adjust the boolean
                 if (cur_word.count(letter) > 1):
                     single_occurrence = True
-
                 # If this GRAY letter is present more than once in this word
                 # and the letter has previously been seen as a GREEN letter,
                 # then it is known that the letter can not appear again and
@@ -114,63 +127,38 @@ def main():
                     for index in range(5):
                         if (index != green_letters.index(letter)):
                             final_word[index].remove(letter)
+                # If it does not fall in the prior conditions, it is an invalid letter
                 elif(letter not in known_letters):
                     invalid_letters.append(letter)
 
     # Boolean used to store whether the word matches the conditions
     word_match = True
 
-    # Add all words whose letters have all been seen
-    for word in wordle_words:
-        word_match = True
-        for index in range(5):
-            if (final_word[index] == []):
-                continue
-            if ((word[index].lower() not in final_word[index])):
-                word_match = False
-                break
-        if (word_match):
-            # Make sure every YELLOW and GREEN letter encountered is found in the word
-            for letter in known_letters:
-                if (word.find(letter) == -1):
-                    word_match = False
-                    break
-        # If all conditions have been met, add the word to the output list
-        if (word_match):
-            output_words.append(word)
-
-    # Add all words that contain the green letters in their spots and the yellow letters in any spots
+    # Add to output_list all words that contain the green letters in their spots and the yellow letters in any spots
     # May include other letters not yet seen
     for word in wordle_words:
         word_match = True
 
         # Ensure that of the green words seen, all match
         for index in range(5):
+            # Ensure the current position of the word does have a green letter
+            # If not, skip this position
             if (green_letters[index] != ""):
-                if (word[index] == green_letters[index]):
-                    word_match = True
-                else:
+                if (word[index] != green_letters[index]):
                     word_match = False
                     break
         if (word_match):
-
             # Ensure that all yellow letters, whose position is not yet known are found in the word
             for letter in known_letters:
-                if (word.find(letter) != -1):
-                    word_match = True
-                else:
+                if (word.find(letter) == -1):
                     word_match = False
                     break
         if (word_match):
-
-            # Ensure that all 
+            # Ensure that no invalid letters appear in the word
             for letter in invalid_letters:
-                if (word.find(letter) == -1):
-                    word_match = True
-                else:
+                if (word.find(letter) != -1):
                     word_match = False
                     break
-
         # If the word matches all conditions, add it to the output list
         if (word_match):
             output_words.append(word)
