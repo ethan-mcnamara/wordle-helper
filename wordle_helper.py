@@ -41,8 +41,8 @@ def main():
     # List of lists to store the individual letters for each work inputted by the user
     formatted_input = []
 
-    # List to store the possible letters for each index in the word
-    final_word = [[], [], [], [], []]
+    # List to store the letters which cannot be found in these positions in the final word as they were seen in YELLOW
+    not_in_final_word = [[], [], [], [], []]
 
     # List to store the letters seen in green, known to be in correct position
     green_letters = ["", "", "", "", ""]
@@ -87,26 +87,16 @@ def main():
         for letter in word:
             # YELLOW word
             if (re.search("-.-", letter)):
-                for index in range(5):
-                    # Since it's yellow, the letter cannot be seen in this position
-                    if (index == word.index(letter)):
-                        continue
-                    # If a green letter has already been seen in that position, skip this position
-                    elif (green_letters[index] != ""):
-                        continue
-                    # Do not add duplicate letters to the list
-                    elif (letter.replace("-", "") not in final_word[index]):
-                        final_word[index].append(letter.replace("-", ""))
-                        known_letters.append(letter.replace("-", ""))
+                # Since it's yellow, the letter cannot be seen in this position
+                not_in_final_word[word.index(letter)].append(letter.replace("-", ""))
+                # Add this letter to the list of letters known to be in the word
+                known_letters.append(letter.replace("-", ""))
                 # If this letter has previously been declared invalid, reverse that
                 if (letter in invalid_letters):
                     invalid_letters.remove(letter)
             # GREEN letter
             elif (re.search("\*.\*", letter)):
-                # Clear all other letters from that position and replace them with this letter
-                final_word[word.index(letter)] = []
-                final_word[word.index(letter)].append(letter.replace("*", ""))
-                # Add this letter to the green_letters list
+                # Add this letter to the green_letters list in the proper position
                 green_letters[word.index(letter)] = letter.replace("*", "")
                 # Add this letter to the known_letters list
                 known_letters.append(letter.replace("*", ""))
@@ -126,7 +116,7 @@ def main():
                 if (single_occurrence and (letter in green_letters)):
                     for index in range(5):
                         if (index != green_letters.index(letter)):
-                            final_word[index].remove(letter)
+                            not_in_final_word[index].append(letter)
                 # If it does not fall in the prior conditions, it is an invalid letter
                 elif(letter not in known_letters):
                     invalid_letters.append(letter)
@@ -147,6 +137,9 @@ def main():
                 if (word[index] != green_letters[index]):
                     word_match = False
                     break
+            elif (word[index] in not_in_final_word[index]):
+                word_match = False
+                break
         if (word_match):
             # Ensure that all yellow letters, whose position is not yet known are found in the word
             for letter in known_letters:
